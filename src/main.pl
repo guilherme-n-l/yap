@@ -1,8 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/env -S perl -I.
 
 use strict;
 use warnings;
-use lib qw(.);
+use FindBin;
+use lib "$FindBin::Bin";
 use Utils;
 
 our @lines;
@@ -22,7 +23,7 @@ else {
     }
 }
 
-if (not @lines) {
+if ( not @lines ) {
     death "Nothing to yap about";
 }
 print Utils::encode_html @lines

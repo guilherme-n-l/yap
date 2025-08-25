@@ -2,9 +2,11 @@ package Utils;
 
 use strict;
 use warnings;
+use feature "state";
 use Exporter;
 use Data::Dumper qw(Dumper);
 use File::Temp   qw(tempfile);
+use URI::Find;
 
 our @ISA = qw( Exporter );
 
@@ -28,6 +30,21 @@ our @EXPORT_OK = qw(
 );
 
 use constant PARSE_ARG_EXPR => qr/^-{1,2}(.*)/;
+use constant TEXT_WIDTH     => 80;
+use constant HTML_STYLE => '<style>
+    :root {
+        --background-color-dark: #141414;
+        --background-color-light: #ebebeb;
+        --text-color-dark: #ebebeb;
+        --text-color-light: #141414;
+        --link-color: #4a90e2;
+        --link-visited-color: #e94e77;
+    }
+    body { color: var(--text-color-dark); background-color: var(--background-color-dark); white-space: pre-wrap; margin: 0;}
+    a { color: var(--link-color); }
+    a:visited { color: var(--link-visited-color); }
+</style>
+';
 
 our $debug      = grep { $_ =~ /^-{1,2}(.*)/ and $1 eq "debug" } @ARGV;
 our $use_editor = 0;
@@ -141,6 +158,27 @@ sub parse_args {
     return @files;
 }
 
+sub line_wrap {
+    my $line  = shift;
+    my $width = TEXT_WIDTH;
+    $line =~ s/(.{1,$width})(?:\s|$)|\S+/$1\n\t/g;
+    $line =~ s/\n\t$//;
+    return $line;
+}
+
+sub linkify {
+    state $finder = URI::Find->new(
+        sub {
+            my ( undef, $uri ) = @_;
+            return sprintf '<a href="%s">%s</a>', $uri, $uri;
+        }
+    );
+
+    my $text = shift;
+    $finder->find( \$text );
+    return $text;
+}
+
 sub encode_html {
     my %html_entities = (
         '&' => '&amp;',
@@ -157,27 +195,19 @@ sub encode_html {
     } @_;
 
     my ( $title, $content ) =
-      ( $lines[0], join "\n", map { "\t$_" } @lines[ 1 .. $#lines ] );
 
-    return "
-<!DOCTYPE html>
+      # ( shift @lines, join "\n", map { "\t" . line_wrap $_ } @lines );
+      ( shift @lines, join "\n", map { "\t" . linkify line_wrap $_ } @lines );
+
+    my $style = HTML_STYLE;
+    $style =~ s/^/\t/mg;
+
+    return "<!DOCTYPE html>
 <html lang=\"en\">
 <head>
     <meta charset=\"utf-8\">
     <title>$title</title>
-    <style>
-        :root {
-            --background-color-dark: #141414;
-            --background-color-light: #ebebeb;
-            --text-color-dark: #ebebeb;
-            --text-color-light: #141414;
-            --link-color: #4a90e2;
-            --link-visited-color: #e94e77;
-        }
-        body { color: var(--text-color-dark); background-color: var(--background-color-dark); white-space: pre-wrap; margin: 0;}
-        a { color: var(--link-color); }
-        a:visited { color: var(--link-visited-color); }
-    </style>
+$style
 </head>
 <body>
 \t--- $title ---
