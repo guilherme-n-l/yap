@@ -7,11 +7,14 @@ use Exporter;
 use Data::Dumper qw(Dumper);
 use File::Temp   qw(tempfile);
 use URI::Find;
+use Digest::SHA qw(sha256_hex);
+use Time::Piece qw(localtime);
 
 our @ISA = qw( Exporter );
 
 our @EXPORT = qw(
   $use_editor
+  $return_header
   $debug
   death
   dbg
@@ -19,6 +22,7 @@ our @EXPORT = qw(
 
 our @EXPORT_OK = qw(
   $use_editor
+  $return_header
   $debug
   death
   dbg
@@ -27,6 +31,7 @@ our @EXPORT_OK = qw(
   parse_args
   from_files
   encode_html
+  header_of
 );
 
 use constant PARSE_ARG_EXPR => qr/^-{1,2}(.*)/;
@@ -46,11 +51,14 @@ use constant HTML_STYLE => '<style>
 </style>
 ';
 
-our $debug      = grep { $_ =~ /^-{1,2}(.*)/ and $1 eq "debug" } @ARGV;
-our $use_editor = 0;
-our %args       = (
+our ( $title, $content );
+our $debug         = grep { $_ =~ /^-{1,2}(.*)/ and $1 eq "debug" } @ARGV;
+our $use_editor    = 0;
+our $return_header = 0;
+our %args          = (
     "editor" => ( sub { $use_editor = 1; } ),
-    "debug"  => ( sub { } )
+    "header" => ( sub { $return_header = 1 } ),
+    "debug"  => ( sub { } ),
 );
 
 sub status {
@@ -199,7 +207,7 @@ sub encode_html {
         $line;
     } @_;
 
-    my ( $title, $content ) =
+    ( $title, $content ) =
       ( shift @lines, line_wrap join "\t\n", map { linkify $_ } @lines );
 
     dbg "Title: $title\n";
@@ -222,5 +230,13 @@ $style
 </html>\n";
 }
 
-1;
+sub fmt_today { localtime->ymd('-'); }
 
+sub header_of {
+    my $digest = sha256_hex shift;
+    my $short  = substr $digest, 0, 6;
+    my $date   = fmt_today();
+    "<a href=\"./articles/$digest\">* $short ($date) -- $title</a>\n";
+}
+
+1;

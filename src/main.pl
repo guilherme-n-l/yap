@@ -26,4 +26,9 @@ else {
 if ( not @lines ) {
     death "Nothing to yap about";
 }
-print Utils::encode_html @lines
+
+my $encoded = Utils::encode_html @lines;
+
+print $return_header
+  ? Utils::header_of $encoded
+  : $encoded;
