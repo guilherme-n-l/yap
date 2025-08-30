@@ -1,17 +1,10 @@
 {
-  perl,
   stdenv,
+  perlEnv,
   lib,
   fetchFromGitHub,
   ...
 }: let
-  perlEnv = perl.withPackages (ps:
-    with ps; [
-      URIFind
-      AppFatPacker
-      FileShareDirInstall
-    ]);
-
   src = fetchFromGitHub {
     owner = "guilherme-n-l";
     repo = "yap";
