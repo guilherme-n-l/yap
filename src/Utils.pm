@@ -200,14 +200,15 @@ sub encode_html {
     } @_;
 
     my ( $title, $content ) =
+      ( shift @lines, line_wrap join "\t\n", map { linkify $_ } @lines );
 
-      # ( shift @lines, join "\n", map { "\t" . line_wrap $_ } @lines );
-      ( shift @lines, join "\n", map { "\t" . linkify line_wrap $_ } @lines );
+    dbg "Title: $title\n";
+    dbg "Content: $content\n";
 
     my $style = HTML_STYLE;
     $style =~ s/^/\t/mg;
 
-    return "<!DOCTYPE html>
+    "<!DOCTYPE html>
 <html lang=\"en\">
 <head>
     <meta charset=\"utf-8\">
@@ -216,10 +217,9 @@ $style
 </head>
 <body>
 \t--- $title ---
-$content
+\t$content
 </body>
-</html>
-";
+</html>\n";
 }
 
 1;
