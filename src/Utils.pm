@@ -72,10 +72,15 @@ sub dbg {
 sub append_to_lines {
     my ( $lines_ref, $fh ) = @_;
     $fh = *STDIN unless defined $fh;
-    my $is_stdin = $fh eq *STDIN;
+
+    my $is_stdin    = $fh eq *STDIN;
+    my $empty_count = 0;
 
     while ( my $line = <$fh> ) {
-        if ($is_stdin) { last unless $line =~ /\S/; }
+        if ($is_stdin) {
+            if ( $line !~ /\S/ ) { last if ++$empty_count == 2; }
+            else                 { $empty_count = 0; }
+        }
         chomp $line;
         dbg "Appending: '$line'\n";
         push @$lines_ref, $line;
