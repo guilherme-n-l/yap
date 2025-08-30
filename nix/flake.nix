@@ -20,7 +20,7 @@
             AppFatPacker
             FileShareDirInstall
           ]);
-        devEnv = pkgs.perl.withPackages (ps: with ps; [PLS LogLog4perl PerlTidy]);
+        devEnv = pkgs.perl.withPackages (ps: with ps; [PLS LogLog4perl PerlTidy podlators]);
         yap = pkgs.callPackage ./default.nix {perlEnv = buildEnv;};
       in {
         packages.default = yap;
