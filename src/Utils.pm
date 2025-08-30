@@ -62,7 +62,7 @@ our %args          = (
 );
 
 sub status {
-    return @_ >> 8;
+    @_ >> 8;
 }
 
 sub death {
@@ -77,12 +77,13 @@ sub dbg {
     warn "@_";
 }
 
-sub append_to_lines {
-    my ( $lines_ref, $fh ) = @_;
+sub from_fh {
+    my $fh = shift;
     $fh = *STDIN unless defined $fh;
 
     my $is_stdin    = $fh eq *STDIN;
     my $empty_count = 0;
+    my @lines;
 
     while ( my $line = <$fh> ) {
         if ($is_stdin) {
@@ -91,8 +92,10 @@ sub append_to_lines {
         }
         chomp $line;
         dbg "Appending: '$line'\n";
-        push @$lines_ref, $line;
+        push @lines, $line;
     }
+
+    return @lines;
 }
 
 sub from_editor {
@@ -111,22 +114,17 @@ sub from_editor {
     if ( not( status system( $cmd, $temp ) ) ) {
         open( my $fh, "<", $temp )
           or death "Tried to yap undreadable file: $temp";
-        append_to_lines \@lines, $fh;
+        @lines = from_fh $fh;
     }
     else {
         dbg "Editor exited with error\n";
         death;
     }
 
-    return @lines;
-
+    @lines;
 }
 
-sub from_stdin {
-    my @lines;
-    append_to_lines \@lines;
-    return @lines;
-}
+sub from_stdin { from_fh; }
 
 sub from_files {
     if ($use_editor) {
@@ -140,10 +138,10 @@ sub from_files {
         open( my $fh, "<", $file )
           or death "Tried to yap undreadable file: $file";
 
-        append_to_lines \@lines, $fh;
+        @lines = ( @lines, from_fh $fh );
     }
 
-    return @lines;
+    @lines;
 }
 
 sub parse_args {
@@ -168,7 +166,7 @@ sub parse_args {
         push @files, $_;
     }
 
-    return @files;
+    @files;
 }
 
 sub line_wrap {
@@ -176,20 +174,21 @@ sub line_wrap {
     my $width = TEXT_WIDTH;
     $line =~ s/(.{1,$width})(?:\s|$)|\S+/$1\n\t/g;
     $line =~ s/\n\t$//;
-    return $line;
+    $line;
 }
 
 sub linkify {
     state $finder = URI::Find->new(
         sub {
             my ( undef, $uri ) = @_;
-            return sprintf '<a href="%s">%s</a>', $uri, $uri;
+            dbg "Found URL: $_\n";
+            sprintf '<a href="%s">%s</a>', $uri, $uri;
         }
     );
 
     my $text = shift;
     $finder->find( \$text );
-    return $text;
+    $text;
 }
 
 sub encode_html {
