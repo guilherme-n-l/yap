@@ -8,13 +8,14 @@
   src = fetchFromGitHub {
     owner = "guilherme-n-l";
     repo = "yap";
-    rev = "v1.0.0";
-    sha256 = "sha256-j/YJEsqRbSjaEq7HOmEx3Zo4f9NxKl8/5NwS5ATqHMA=";
+    rev = "v1.0.1";
+    sha256 = lib.fakeHash;
   };
+  version = "1.0.1";
 in
   stdenv.mkDerivation {
     pname = "yap";
-    version = "1.0.0";
+    version = version;
 
     src = "${src}/src";
 
@@ -25,6 +26,10 @@ in
       export PATH=${perlEnv}/bin:$PATH
 
       echo "PERL5LIB=$PERL5LIB"
+
+      mkdir -p man/man1
+      pod2man --section=1 --center="Yap Documentation" --name="YAP" --release="yap ${version}" $src/main.pl man/man1/yap.1
+
       fatpack trace $src/main.pl
       fatpack packlists-for $(cat fatpacker.trace) > packlists
       fatpack tree $(cat packlists)
@@ -33,12 +38,16 @@ in
       cp $src/Utils.pm fatlib/
 
       fatpack file $src/main.pl > fatpacked.pl
+
     '';
 
     installPhase = ''
       mkdir -p $out/bin
       cp fatpacked.pl $out/bin/yap
       chmod +x $out/bin/yap
+
+      mkdir -p $out/share/man/man1
+      cp man/man1/yap.1 $out/share/man/man1/
     '';
 
     meta = {
