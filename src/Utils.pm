@@ -46,7 +46,12 @@ use constant HTML_STYLE => '<style>
         --link-color: #4a90e2;
         --link-visited-color: #e94e77;
     }
-    body { color: var(--text-color-dark); background-color: var(--background-color-dark); white-space: pre-wrap; margin: 0;}
+    body {
+        color: var(--text-color-dark);
+        background-color: var(--background-color-dark);
+		white-space: pre-wrap;
+		margin: 0;
+    }
     a { color: var(--link-color); }
     a:visited { color: var(--link-visited-color); }
 </style>
@@ -265,12 +270,19 @@ Utils - Utility subroutines for the Yap CLI application
 
   # Example: Parse arguments and process input
   my @files = parse_args();
-  my @lines = @files ? from_files(@files) : $use_editor ? from_editor() : from_stdin();
+  my @lines = @files
+    ? from_files(@files)
+    : $use_editor
+        ? from_editor()
+        : from_stdin();
   print encode_html(@lines);
 
 =head1 DESCRIPTION
 
-This module provides utility functions and variables for the Yap CLI application, which processes text input (from files, stdin, or an editor) and generates HTML output. It is designed for internal use by C<main.pl> and is not intended as a public library.
+This module provides utility functions and variables for the Yap CLI application, 
+which processes text input (from files, stdin, or an editor) and generates HTML 
+output. It is designed for internal use by C<main.pl> and is not intended as a 
+public library.
 
 =head1 EXPORTED VARIABLES
 
@@ -278,15 +290,21 @@ This module provides utility functions and variables for the Yap CLI application
 
 =item C<$use_editor>
 
-Boolean flag indicating whether to use the user's editor (set by the C<--editor> flag). Defaults to 0.
+Boolean flag indicating whether to use the user's editor (set by the C<--editor> 
+flag). Defaults to 0.
 
 =item C<$return_header>
 
-Boolean flag indicating whether to return a header (set by the C<--header> flag). Defaults to 0.
+Boolean flag indicating whether to return a header (set by the C<--header> flag). 
+Defaults to 0.
 
 =item C<$debug>
 
 Boolean flag enabling debug output (set by the C<--debug> flag). Defaults to 0.
+
+=item C<$output_file>
+
+File handler that points to the descriptor where the output is written. Defaults to STDOUT.
 
 =item C<$title>
 
@@ -304,7 +322,8 @@ Stores the formatted content of the processed input (set by C<encode_html>).
 
 =item C<status(@args)>
 
-Returns the exit status of a system command by shifting the exit code right by 8 bits.
+Returns the exit status of a system command by shifting the exit code right by 8 
+bits.
 
 =back
 
@@ -314,7 +333,7 @@ Returns the exit status of a system command by shifting the exit code right by 8
 
 =item C<death(@msg)>
 
-C<die> wrapper. In debug mode, prints out source-code line where C<death> occured.
+C<die> wrapper. In debug mode, prints out source-code line where C<death> occurred.
 
 =item C<dbg(@msg)>
 
@@ -322,11 +341,13 @@ Prints a debug message to STDERR if C<$debug> is true.
 
 =item C<from_fh([$fh])>
 
-Reads lines from a filehandle (defaults to STDIN). For STDIN, stops on two consecutive empty lines.
+Reads lines from a filehandle (defaults to STDIN). For STDIN, stops on two 
+consecutive empty lines.
 
 =item C<from_editor()>
 
-Opens the user's editor (C<$ENV{EDITOR}> or C<vi>) to collect input via a temporary file.
+Opens the user's editor (C<$ENV{EDITOR}> or C<vi>) to collect input via a temporary 
+file.
 
 =item C<from_stdin()>
 
@@ -338,7 +359,8 @@ Reads lines from a list of files, ensuring C<$use_editor> is not set.
 
 =item C<parse_args()>
 
-Parses C<@ARGV> for flags (e.g., C<--editor>, C<--header>, C<--debug>) and returns a list of file names.
+Parses C<@ARGV> for flags (e.g., C<--editor>, C<--header>, C<--debug>) and returns a 
+list of file names.
 
 =item C<line_wrap($line)>
 
@@ -350,7 +372,8 @@ Converts URLs in text to HTML C<< <a> >> tags using C<URI::Find>.
 
 =item C<encode_html(@lines)>
 
-Converts input lines to an HTML document, setting C<$title> (first line) and C<$content> (remaining lines, wrapped and linkified).
+Converts input lines to an HTML document, setting C<$title> (first line) and 
+C<$content> (remaining lines, wrapped and linkified).
 
 =item C<fmt_today()>
 
@@ -358,7 +381,8 @@ Returns the current date in YYYY-MM-DD format.
 
 =item C<header_of($text)>
 
-Generates an HTML anchor tag for a header using a SHA-256 digest, date, and C<$title>.
+Generates an HTML anchor tag for a header using a SHA-256 digest, date, and 
+C<$title>.
 
 =back
 
@@ -386,6 +410,7 @@ Guilherme Lima <acc.guilhermenl@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2025 Guilherme Lima. This module is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2025 Guilherme Lima. This module is free software; you can redistribute 
+it and/or modify it under the same terms as Perl itself.
 
 =cut

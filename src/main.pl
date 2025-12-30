@@ -47,7 +47,11 @@ Yap - A command-line tool for converting text input to HTML
 
 =head1 DESCRIPTION
 
-Yap is a Perl-based command-line tool that converts text input into an HTML document. Input can come from files, standard input (STDIN), or a text editor. The first line of input is treated as the title, and the remaining lines are formatted as content with URLs converted to clickable links. Yap supports options to control input sources, output format, and debugging.
+Yap is a Perl-based command-line tool that converts text input into an HTML document. 
+Input can come from files, standard input (STDIN), or a text editor. The first line of 
+input is treated as the title, and the remaining lines are formatted as content with 
+URLs converted to clickable links. Yap supports options to control input sources, output 
+format, and debugging.
 
 =head1 USAGE
 
@@ -55,7 +59,9 @@ Run the `yap` command with optional flags and input sources:
 
     yap [options] [file ...]
 
-If no files or options are provided, Yap reads from STDIN until two consecutive empty lines are encountered. Use the `--editor` flag to input text via a text editor, or specify files to process their contents.
+If no files or options are provided, Yap reads from STDIN until two consecutive empty 
+lines are encountered. Use the `--editor` flag to input text via a text editor, or 
+specify files to process their contents.
 
 =head1 OPTIONS
 
@@ -63,7 +69,8 @@ If no files or options are provided, Yap reads from STDIN until two consecutive 
 
 =item B<--editor>
 
-Opens the text editor specified by the C<EDITOR> environment variable (defaults to C<vi>) to collect input. Cannot be used with file arguments.
+Opens the text editor specified by the C<EDITOR> environment variable (defaults to 
+C<vi>) to collect input. Cannot be used with file arguments.
 
 Example:
     export EDITOR=nano
@@ -71,21 +78,24 @@ Example:
 
 =item B<--header>
 
-Outputs an HTML anchor tag summarizing the content instead of the full HTML document. The header includes a SHA-256 digest of the content, the current date, and the title.
+Outputs an HTML anchor tag summarizing the content instead of the full HTML document. 
+The header includes a SHA-256 digest of the content, the current date, and the title.
 
 Example:
     yap --header input.txt
 
 =item B<--debug>
 
-Enables debug output, printing diagnostic messages to STDERR, such as parsed arguments, file operations, and processed lines.
+Enables debug output, printing diagnostic messages to STDERR, such as parsed arguments, 
+file operations, and processed lines.
 
 Example:
     yap --debug input.txt
 
 =item B<-->
 
-Separates options from file arguments to allow processing files with names starting with dashes.
+Separates options from file arguments to allow processing files with names starting 
+with dashes.
 
 Example:
     yap --debug -- -file.txt
@@ -100,14 +110,16 @@ Yap accepts input from one of the following sources:
 
 =item B<Standard Input (STDIN)>
 
-If no files or C<--editor> is specified, Yap reads from STDIN. Input terminates after two consecutive empty lines.
+If no files or C<--editor> is specified, Yap reads from STDIN. Input terminates after 
+two consecutive empty lines.
 
 Example:
     echo -e "My Title\nLine 1\nLine 2\n\n" | yap
 
 =item B<Text Editor>
 
-With the C<--editor> flag, Yap opens the editor defined in C<EDITOR> (e.g., C<vim>, C<nano>). Enter text, save, and exit the editor to process the input.
+With the C<--editor> flag, Yap opens the editor defined in C<EDITOR> (e.g., C<vim>, 
+C<nano>). Enter text, save, and exit the editor to process the input.
 
 Example:
     yap --editor
@@ -126,10 +138,12 @@ Example:
 Yap generates an HTML document by default, with the following structure:
 
 - The first line of input becomes the HTML C<< <title> >> and is displayed in the body.
-- Remaining lines are wrapped to 80 characters, with URLs converted to clickable C<< <a> >> tags.
+- Remaining lines are wrapped to 80 characters, with URLs converted to clickable 
+C<< <a> >> tags.
 - A CSS style block defines colors and layout for dark and light themes.
 
-If the C<--header> flag is used, Yap outputs a single HTML anchor tag with a SHA-256 digest, the current date, and the title.
+If the C<--header> flag is used, Yap outputs a single HTML anchor tag with a SHA-256 
+digest, the current date, and the title.
 
 Example output (without C<--header>):
     <!DOCTYPE html>
@@ -190,9 +204,10 @@ Yap may terminate with an error message in the following cases:
 
 - Invalid arguments (e.g., unknown flags): "Unable to parse argument 'flag'"
 
-- Unreadable files: "Tried to yap undreadable file: filename"
+- Unreadable files: "Tried to yap unreadable file: filename"
 
-- Using C<--editor> with file arguments: "Ambiguous parameters: tried to yap a file and use a text editor"
+- Using C<--editor> with file arguments: "Ambiguous parameters: tried to yap a file 
+and use a text editor"
 
 - No input provided: "Nothing to yap about"
 
@@ -218,7 +233,8 @@ Guilherme Lima <acc.guilhermenl@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2025 Guilherme Lima. This software is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2025 Guilherme Lima. This software is free software; you can redistribute 
+it and/or modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
