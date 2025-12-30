@@ -15,6 +15,7 @@ our @EXPORT = qw(
   $use_editor
   $return_header
   $debug
+  $output_file
   death
   dbg
 );
@@ -23,6 +24,7 @@ our @EXPORT_OK = qw(
   $use_editor
   $return_header
   $debug
+  $output_file
   death
   dbg
   from_editor
@@ -58,6 +60,14 @@ our %args          = (
     "editor" => ( sub { $use_editor    = 1; } ),
     "header" => ( sub { $return_header = 1; } ),
     "debug"  => ( sub { } ),
+    "output" => (
+        sub {
+            my $filename = shift @_ // "default.html";
+            dbg "Changing output to $filename\n";
+            $output_file = open $output_file, ">", $filename
+              or death "Could not write to file $filename: $!";
+        }
+    ),
 );
 
 sub status {
@@ -154,11 +164,14 @@ sub parse_args {
                 next;
             }
 
-            if ( not exists $args{$1} ) {
-                death "Unable to parse argument '$1'";
-            }
+            my $arg = $1;
+            my ( $arg_name, @arg_values ) =
+              $arg =~ /(.*)=(.*)/
+              ? ( $1, split /,/, $2 )
+              : ( $arg, () );
 
-            $args{$1}->();
+            exists $args{$arg_name} or death "Unable to parse argument '$arg'";
+            $args{$arg_name}->(@arg_values);
             next;
         }
 
