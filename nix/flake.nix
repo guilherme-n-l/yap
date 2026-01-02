@@ -18,7 +18,7 @@
           with ps; [
             URIFind
             AppFatPacker
-            FileShareDirInstall
+            HTMLEscape
           ]);
         devEnv = pkgs.perl.withPackages (ps: with ps; [PLS LogLog4perl PerlTidy podlators]);
         yap = pkgs.callPackage ./default.nix {perlEnv = buildEnv;};
@@ -38,7 +38,7 @@
                 $i --version | grep -v '^[[:space:]]*$' | head -n 1
             done
 
-            for i in PLS Log::Log4perl URI::Find App::FatPacker; do
+            for i in PLS Log::Log4perl URI::Find App::FatPacker HTML::Escape; do
                 version=$(cpan -D "$i" | grep "Installed" | awk '{print $NF}')
                 echo "$i -- $version"
             done

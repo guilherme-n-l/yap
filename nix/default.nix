@@ -8,8 +8,8 @@
   src = fetchFromGitHub {
     owner = "guilherme-n-l";
     repo = "yap";
-    rev = "v1.0.1";
-    sha256 = "sha256-WRAAhdoTPA9U292uZRs2ZwFzspB2TAuot12/lROUNjM=";
+    rev = "v2.0.0";
+    sha256 = "sha256-D7/Kp3/3gLsfCWHQp/1t0BEemw1lrq2pDVEegQlpdZA=";
   };
   version = "1.0.1";
 in
