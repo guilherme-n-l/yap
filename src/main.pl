@@ -2,36 +2,14 @@
 
 use strict;
 use warnings;
-use FindBin;
-use lib "$FindBin::Bin";
+
 use Utils;
 
-our @lines;
-
-if ( !@ARGV or ( @ARGV == 1 and $debug ) ) {
-    @lines = Utils::from_stdin;
-}
-else {
-    my @files = Utils::parse_args;
-
-    if (@files) {
-        @lines = Utils::from_files @files;
-    }
-
-    if ($use_editor) {
-        @lines = Utils::from_editor;
-    }
-}
-
-if ( not @lines ) {
-    death "Nothing to yap about";
-}
-
-my $encoded = Utils::encode_html @lines;
-
-print $return_header
-  ? Utils::header_of $encoded
-  : $encoded;
+parse_args;
+my ( $title, @lns ) = to_text from_input;
+my $page   = to_html_page $title, wrap @lns;
+my $header = header_of $title,    $page;
+to_output $header, $page;
 
 __END__
 
@@ -47,11 +25,11 @@ Yap - A command-line tool for converting text input to HTML
 
 =head1 DESCRIPTION
 
-Yap is a Perl-based command-line tool that converts text input into an HTML document. 
-Input can come from files, standard input (STDIN), or a text editor. The first line of 
-input is treated as the title, and the remaining lines are formatted as content with 
-URLs converted to clickable links. Yap supports options to control input sources, output 
-format, and debugging.
+Yap is a Perl-based command-line tool that converts text input into an HTML 
+document. Input can come from files, standard input (STDIN), or a text editor. 
+The first line of input is treated as the title, and the remaining lines are 
+formatted as content with URLs converted to clickable links. Yap supports options 
+to control input sources, output format, and debugging.
 
 =head1 USAGE
 
@@ -59,9 +37,9 @@ Run the `yap` command with optional flags and input sources:
 
     yap [options] [file ...]
 
-If no files or options are provided, Yap reads from STDIN until two consecutive empty 
-lines are encountered. Use the `--editor` flag to input text via a text editor, or 
-specify files to process their contents.
+If no files or options are provided, Yap reads from STDIN until EOF is encountered.
+Use the `--editor` flag to input text via a text editor, or specify files to process
+their contents.
 
 =head1 OPTIONS
 
@@ -69,8 +47,8 @@ specify files to process their contents.
 
 =item B<--editor>
 
-Opens the text editor specified by the C<EDITOR> environment variable (defaults to 
-C<vi>) to collect input. Cannot be used with file arguments.
+Opens the text editor specified by the C<EDITOR> environment variable to collect
+input. Cannot be used with file arguments.
 
 Example:
     export EDITOR=nano
@@ -78,24 +56,40 @@ Example:
 
 =item B<--header>
 
-Outputs an HTML anchor tag summarizing the content instead of the full HTML document. 
-The header includes a SHA-256 digest of the content, the current date, and the title.
+Outputs an HTML anchor tag summarizing the content instead of the full HTML 
+document. The header includes a SHA-256 digest of the content, the current date, 
+and the title.
 
 Example:
     yap --header input.txt
 
 =item B<--debug>
 
-Enables debug output, printing diagnostic messages to STDERR, such as parsed arguments, 
-file operations, and processed lines.
+Enables debug output, printing diagnostic messages to STDERR, such as parsed 
+arguments, file operations, and processed lines.
 
 Example:
     yap --debug input.txt
 
+=item B<--columns number>
+
+Sets the maximum number of characters per line for wrapped text (default is 80). 
+If the number is non-positive, Yap defaults to 80 columns.
+
+Example:
+    yap --columns 100 input.txt
+
+=item B<--help>
+
+Displays the help message and exits.
+
+Example:
+    yap --help
+
 =item B<-->
 
-Separates options from file arguments to allow processing files with names starting 
-with dashes.
+Separates options from file arguments to allow processing files with names 
+starting with dashes.
 
 Example:
     yap --debug -- -file.txt
@@ -110,16 +104,16 @@ Yap accepts input from one of the following sources:
 
 =item B<Standard Input (STDIN)>
 
-If no files or C<--editor> is specified, Yap reads from STDIN. Input terminates after 
-two consecutive empty lines.
+If no files or C<--editor> is specified, Yap reads from STDIN. Input terminates 
+after two consecutive empty lines.
 
 Example:
     echo -e "My Title\nLine 1\nLine 2\n\n" | yap
 
 =item B<Text Editor>
 
-With the C<--editor> flag, Yap opens the editor defined in C<EDITOR> (e.g., C<vim>, 
-C<nano>). Enter text, save, and exit the editor to process the input.
+With the C<--editor> flag, Yap opens the editor defined in C<EDITOR> (e.g., 
+C<vim>, C<nano>). Enter text, save, and exit the editor to process the input.
 
 Example:
     yap --editor
@@ -204,7 +198,7 @@ Yap may terminate with an error message in the following cases:
 
 - Invalid arguments (e.g., unknown flags): "Unable to parse argument 'flag'"
 
-- Unreadable files: "Tried to yap unreadable file: filename"
+- Unreadable files: "Tried to yap unreadable file: 'filename'"
 
 - Using C<--editor> with file arguments: "Ambiguous parameters: tried to yap a file 
 and use a text editor"
